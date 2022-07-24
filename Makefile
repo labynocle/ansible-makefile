@@ -1,4 +1,3 @@
-.PHONY: clean list help basic-checks set-env deploy
 .DEFAULT_GOAL := help
 
 SHELL                      = /bin/bash
@@ -37,13 +36,15 @@ ANSIBLE_GALAXY_CMD          = ${VENV_NAME}/bin/ansible-galaxy \
 ## -----
 ##
 
+.PHONY: list
 list: ## Generate basic list of all targets
 	@grep '^[^\.#[:space:]].*:' Makefile | \
 		grep -v "=" | \
 		cut -d':' -f1
 
+.PHONY: help
 help: ## Makefile help
-	@grep -E '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | \
+	@grep -E '(^[a-zA-Z_0-9%-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | \
 		sed -e 's/\[32m##/[33m/'
 
@@ -52,11 +53,13 @@ help: ## Makefile help
 ## -----
 ##
 
+.PHONY: clean
 clean: ## Clean the ansible virtal env
 	@rm -rf ${VENV_NAME}
 	@rm -rf ${ANSIBLE_IMPORTED_ROLES_LINK}
 	@rm -rf ${ANSIBLE_IMPORTED_ROLES_DIR}
 
+.PHONY: set-env
 set-env: ## Generate ansible virtual env
 	if [ ! -d "${VENV_NAME}" ]; then \
 		python3 -m venv ${VENV_NAME} && \
@@ -74,6 +77,7 @@ set-env: ## Generate ansible virtual env
 ## -----
 ##
 
+.PHONY: basic-checks
 basic-checks: ## Add basic checks before launching ansible command
 ifeq ("$(wildcard $(ANSIBLE_HOST_FILE))","")
 	@echo "$(ANSIBLE_HOST_FILE) does not exist - please specify ENV, eg: make deploy ENV=prod PLAYBOOK=projectA"
@@ -88,5 +92,6 @@ ifeq ("$(wildcard $(ANSIBLE_DEPLOY_PLAYBOOK))","")
 	@exit 1
 endif
 
+.PHONY: deploy
 deploy: basic-checks set-env ## Launch the ansible deploy command
 	${ANSIBLE_PLAYBOOK_CMD}
