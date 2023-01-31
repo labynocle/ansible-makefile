@@ -1,4 +1,11 @@
 ---
 
-- src:     geerlingguy.docker
-  version: 2.5.3
+collections:
+  - name: netbox.netbox
+    version: 3.7.1
+  - name: community.hashi_vault
+    version: 3.0.0
+
+roles:
+  - name: geerlingguy.docker
+    version: 6.0.4

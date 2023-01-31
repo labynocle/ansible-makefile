@@ -23,8 +23,15 @@ ANSIBLE_REQ_FILE            = ansible-requirements.yml
 ANSIBLE_REQ_SHA1            = $(shell sha1sum $(ANSIBLE_REQ_FILE) | cut -f1 -d " " | sed -e 's/^\(.\{5\}\).*/\1/')
 ANSIBLE_IMPORTED_ROLES_LINK = ./imported_roles
 ANSIBLE_IMPORTED_ROLES_DIR  = ./.imported_roles-${ANSIBLE_REQ_SHA1}
-ANSIBLE_GALAXY_CMD          = ${VENV_NAME}/bin/ansible-galaxy \
-                              install \
+ANSIBLE_IMPORTED_COLLECS_LINK = ./imported_collections
+ANSIBLE_IMPORTED_COLLECS_DIR  = ./.imported_collections-${ANSIBLE_REQ_SHA1}
+ANSIBLE_COLLECS_GALAXY_CMD  = ${VENV_NAME}/bin/ansible-galaxy \
+                              collection install \
+                                -f \
+                                -p ${ANSIBLE_IMPORTED_COLLECS_DIR} \
+                                -r ${ANSIBLE_REQ_FILE}
+ANSIBLE_ROLES_GALAXY_CMD    = ${VENV_NAME}/bin/ansible-galaxy \
+                              role install \
                                 -f \
                                 -p ${ANSIBLE_IMPORTED_ROLES_DIR} \
                                 -r ${ANSIBLE_REQ_FILE}
@@ -67,9 +74,14 @@ set-env: ## Generate ansible virtual env
 		${VENV_NAME}/bin/python3 -m pip install -r ${DEPLOY_REQ_FILE} ;\
 	fi
 	if [ ! -d "${ANSIBLE_IMPORTED_ROLES_DIR}" ]; then \
-		${ANSIBLE_GALAXY_CMD} && \
+		${ANSIBLE_ROLES_GALAXY_CMD} && \
 		rm -rf ${ANSIBLE_IMPORTED_ROLES_LINK} && \
 		ln -s ${ANSIBLE_IMPORTED_ROLES_DIR} ${ANSIBLE_IMPORTED_ROLES_LINK}; \
+	fi
+	if [ ! -d "${ANSIBLE_IMPORTED_COLLECS_DIR}" ]; then \
+		${ANSIBLE_COLLECS_GALAXY_CMD} && \
+		rm -rf ${ANSIBLE_IMPORTED_COLLECS_LINK} && \
+		ln -s ${ANSIBLE_IMPORTED_COLLECS_DIR} ${ANSIBLE_IMPORTED_COLLECS_LINK}; \
 	fi
 
 ##
